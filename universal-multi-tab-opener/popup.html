@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Multi Tab Opener</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>🌐 Universal Multi Tab Opener</h1>
+      <p class="subtitle">Open multiple URLs, Amazon Orders, or Custom Templates instantly</p>
+    </header>
+
+    <!-- Mode Tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="smart">
+        <span class="tab-icon">🔍</span>
+        <span class="tab-label">Smart</span>
+      </button>
+      <button class="mode-tab" data-mode="direct">
+        <span class="tab-icon">🔗</span>
+        <span class="tab-label">Direct Links</span>
+      </button>
+      <button class="mode-tab" data-mode="amazon">
+        <span class="tab-icon">📦</span>
+        <span class="tab-label">Amazon Orders</span>
+      </button>
+      <button class="mode-tab" data-mode="custom">
+        <span class="tab-icon">⚙️</span>
+        <span class="tab-label">Custom Template</span>
+      </button>
+      <button class="mode-tab" data-mode="history">
+        <span class="tab-icon">📜</span>
+        <span class="tab-label">History</span>
+      </button>
+      <button class="mode-tab" data-mode="settings">
+        <span class="tab-icon">🔧</span>
+        <span class="tab-label">Settings</span>
+      </button>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="content-area">
+      
+      <!-- Smart Mode Panel -->
+      <div id="panel-smart" class="panel active">
+        <div class="panel-header">
+          <h2>Smart Auto Detect</h2>
+          <p class="panel-desc">Automatically detect input type and process accordingly</p>
+        </div>
+        <div class="detection-status" id="smart-detection-status">
+          <span class="status-icon">🔍</span>
+          <span class="status-text">Waiting for input...</span>
+        </div>
+      </div>
+
+      <!-- Direct Links Panel -->
+      <div id="panel-direct" class="panel">
+        <div class="panel-header">
+          <h2>Direct Link Mode</h2>
+          <p class="panel-desc">Paste multiple URLs to open them in separate tabs</p>
+        </div>
+      </div>
+
+      <!-- Amazon Orders Panel -->
+      <div id="panel-amazon" class="panel">
+        <div class="panel-header">
+          <h2>Amazon Order ID Mode</h2>
+          <p class="panel-desc">Enter Amazon Order IDs to generate Seller Central URLs</p>
+        </div>
+        <div class="template-info">
+          <p><strong>URL Pattern:</strong> <code>https://sellercentral.amazon.com/orders-v3/order/{ORDER_ID}</code></p>
+        </div>
+      </div>
+
+      <!-- Custom Template Panel -->
+      <div id="panel-custom" class="panel">
+        <div class="panel-header">
+          <h2>Custom URL Template Mode</h2>
+          <p class="panel-desc">Create custom URL patterns with placeholders</p>
+        </div>
+        <div class="form-group">
+          <label for="custom-template">URL Template:</label>
+          <input type="text" id="custom-template" class="input-field" placeholder="https://example.com/orders/{ID}">
+          <p class="field-hint">Use placeholders: <code>{ID}</code>, <code>{VALUE}</code>, or <code>{ORDER_ID}</code></p>
+        </div>
+      </div>
+
+      <!-- Shared Input Area (for Smart, Direct, Amazon, Custom modes) -->
+      <div class="input-section" id="main-input-section">
+        <div class="form-group">
+          <label for="input-textarea">Input:</label>
+          <textarea 
+            id="input-textarea" 
+            class="textarea-field" 
+            placeholder="Paste multiple links or IDs here...
+
+Examples:
+
+https://google.com
+https://amazon.com
+
+or Amazon Order IDs:
+
+114-1234567-1234567
+114-7654321-7654321
+
+or any custom IDs when using a URL template."
+            rows="8"></textarea>
+        </div>
+
+        <!-- Live Counter -->
+        <div class="counter-bar">
+          <span class="counter-item">
+            <span class="counter-label">Detected:</span>
+            <span class="counter-value" id="count-detected">0</span>
+          </span>
+          <span class="counter-item">
+            <span class="counter-label">Valid:</span>
+            <span class="counter-value" id="count-valid">0</span>
+          </span>
+          <span class="counter-item">
+            <span class="counter-label">Duplicates:</span>
+            <span class="counter-value" id="count-duplicates">0</span>
+          </span>
+        </div>
+
+        <!-- Options -->
+        <div class="options-section">
+          <label class="checkbox-label">
+            <input type="checkbox" id="opt-background" checked>
+            <span>Open tabs in background</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="opt-activate" checked>
+            <span>Activate existing tabs</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="opt-skip" checked>
+            <span>Skip already open links</span>
+          </label>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+          <button id="btn-open" class="btn btn-primary">
+            <span class="btn-icon">🚀</span>
+            Open All Tabs
+          </button>
+          <button id="btn-preview" class="btn btn-secondary">
+            <span class="btn-icon">👁️</span>
+            Preview Links
+          </button>
+          <button id="btn-copy" class="btn btn-secondary">
+            <span class="btn-icon">📋</span>
+            Copy Generated Links
+          </button>
+          <button id="btn-clear" class="btn btn-danger">
+            <span class="btn-icon">🗑️</span>
+            Clear
+          </button>
+        </div>
+
+        <!-- Results Summary -->
+        <div id="results-summary" class="results-summary hidden">
+          <h3>Results Summary</h3>
+          <div class="summary-grid">
+            <div class="summary-item success">
+              <span class="summary-label">Valid Items:</span>
+              <span class="summary-value" id="sum-valid">0</span>
+            </div>
+            <div class="summary-item warning">
+              <span class="summary-label">Duplicates Removed:</span>
+              <span class="summary-value" id="sum-duplicates">0</span>
+            </div>
+            <div class="summary-item error">
+              <span class="summary-label">Invalid Entries:</span>
+              <span class="summary-value" id="sum-invalid">0</span>
+            </div>
+            <div class="summary-item info">
+              <span class="summary-label">New Tabs Opened:</span>
+              <span class="summary-value" id="sum-new-tabs">0</span>
+            </div>
+            <div class="summary-item info">
+              <span class="summary-label">Existing Tabs Activated:</span>
+              <span class="summary-value" id="sum-existing">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Panel -->
+      <div id="panel-history" class="panel full-panel">
+        <div class="panel-header">
+          <h2>History</h2>
+          <p class="panel-desc">View and manage previous sessions</p>
+        </div>
+        <div id="history-list" class="history-list">
+          <p class="empty-message">No history yet. Start opening some tabs!</p>
+        </div>
+        <div class="history-actions">
+          <button id="btn-clear-history" class="btn btn-danger">Clear All History</button>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div id="panel-settings" class="panel full-panel">
+        <div class="panel-header">
+          <h2>Settings</h2>
+          <p class="panel-desc">Configure extension behavior</p>
+        </div>
+        
+        <div class="form-group">
+          <label for="setting-tab-limit">Maximum Tab Limit:</label>
+          <input type="number" id="setting-tab-limit" class="input-field" min="1" max="500" value="50">
+          <p class="field-hint">Warning will show when opening more than this many tabs</p>
+        </div>
+
+        <div class="form-group">
+          <label for="setting-history-limit">History Entries to Keep:</label>
+          <input type="number" id="setting-history-limit" class="input-field" min="1" max="100" value="10">
+          <p class="field-hint">Number of recent sessions to save</p>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="setting-auto-save" checked>
+            <span>Auto-save input on close</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="setting-restore-input" checked>
+            <span>Restore input on open</span>
+          </label>
+        </div>
+
+        <div class="settings-actions">
+          <button id="btn-save-settings" class="btn btn-primary">Save Settings</button>
+          <button id="btn-reset-settings" class="btn btn-secondary">Reset to Defaults</button>
+        </div>
+
+        <div class="settings-info">
+          <h3>About</h3>
+          <p><strong>Version:</strong> 1.0.0</p>
+          <p><strong>Description:</strong> A powerful tool to open multiple URLs, Amazon Order pages, or custom URL templates in separate Chrome tabs.</p>
+          <p class="disclaimer">This extension only manages and opens URLs. It does not scrape data, bypass security, or interact with websites automatically.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Preview Links</h2>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="preview-list" class="preview-list"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-confirm-open" class="btn btn-primary">Open Selected Tabs</button>
+          <button id="btn-cancel-preview" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+      <div class="spinner"></div>
+      <p class="loading-text">Processing tabs...</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+      <span class="toast-icon"></span>
+      <span class="toast-message"></span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
