@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon Order Tab Opener</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>Amazon Order Tab Opener</h1>
+      <p class="subtitle">Paste multiple Amazon Order IDs to instantly open their Seller Central pages.</p>
+    </header>
+
+    <!-- Input Section -->
+    <div class="input-section">
+      <textarea 
+        id="orderInput" 
+        placeholder="Paste Order IDs here...
+
+Example:
+114-1234567-1234567
+114-7654321-7654321"
+      ></textarea>
+      <div class="counter" id="counter">Detected Order IDs: 0</div>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="results" id="results" style="display: none;">
+      <div class="result-item"><span class="label">Valid Order IDs:</span> <span class="value" id="validCount">0</span></div>
+      <div class="result-item"><span class="label">Duplicate IDs Removed:</span> <span class="value" id="duplicateCount">0</span></div>
+      <div class="result-item"><span class="label">Invalid Entries Ignored:</span> <span class="value" id="invalidCount">0</span></div>
+      <div class="result-item"><span class="label">New Tabs Opened:</span> <span class="value" id="tabsOpened">0</span></div>
+      <div class="result-item"><span class="label">Existing Tabs Activated:</span> <span class="value" id="tabsActivated">0</span></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <button id="openTabsBtn" class="btn btn-primary">Open Order Tabs</button>
+      <button id="copyLinksBtn" class="btn btn-secondary">Copy All Links</button>
+      <button id="clearBtn" class="btn btn-clear">Clear</button>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+      <div class="spinner"></div>
+      <p>Opening tabs...</p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

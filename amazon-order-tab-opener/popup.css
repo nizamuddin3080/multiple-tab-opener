@@ -1,0 +1,274 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #232f3e;
+  background-color: #ffffff;
+  width: 400px;
+  min-height: auto;
+}
+
+.container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Header Styles */
+.header {
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #ff9900;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #232f3e;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #565959;
+  line-height: 1.4;
+}
+
+/* Input Section */
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+textarea {
+  width: 100%;
+  height: 180px;
+  padding: 12px;
+  border: 2px solid #d5d9d9;
+  border-radius: 8px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  resize: vertical;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #007185;
+  box-shadow: 0 0 0 3px rgba(0, 113, 133, 0.15);
+}
+
+textarea::placeholder {
+  color: #999;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 13px;
+}
+
+.counter {
+  font-size: 12px;
+  color: #565959;
+  font-weight: 500;
+}
+
+/* Results Summary */
+.results {
+  background-color: #f0f8ff;
+  border: 1px solid #b8d4e8;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.result-item .label {
+  color: #232f3e;
+  font-weight: 500;
+}
+
+.result-item .value {
+  color: #007185;
+  font-weight: 600;
+}
+
+/* Button Group */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #007185;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #005a6b;
+}
+
+.btn-primary:active {
+  background-color: #004d5c;
+}
+
+.btn-secondary {
+  background-color: #ff9900;
+  color: #232f3e;
+}
+
+.btn-secondary:hover {
+  background-color: #e88b00;
+}
+
+.btn-secondary:active {
+  background-color: #d47f00;
+}
+
+.btn-clear {
+  background-color: #e7e7e7;
+  color: #232f3e;
+}
+
+.btn-clear:hover {
+  background-color: #d5d5d5;
+}
+
+.btn-clear:active {
+  background-color: #c7c7c7;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e7e7e7;
+  border-top-color: #007185;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-overlay p {
+  font-size: 14px;
+  color: #232f3e;
+  font-weight: 500;
+}
+
+/* Confirmation Dialog */
+.confirmation-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.confirmation-content {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 320px;
+  text-align: center;
+}
+
+.confirmation-content h3 {
+  font-size: 16px;
+  color: #232f3e;
+  margin-bottom: 12px;
+}
+
+.confirmation-content p {
+  font-size: 14px;
+  color: #565959;
+  margin-bottom: 20px;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.confirmation-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirmation-buttons .btn-cancel {
+  background-color: #e7e7e7;
+  color: #232f3e;
+}
+
+.confirmation-buttons .btn-cancel:hover {
+  background-color: #d5d5d5;
+}
+
+.confirmation-buttons .btn-confirm {
+  background-color: #007185;
+  color: white;
+}
+
+.confirmation-buttons .btn-confirm:hover {
+  background-color: #005a6b;
+}
