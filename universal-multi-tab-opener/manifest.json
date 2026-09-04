@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Universal Multi Tab Opener",
-  "version": "1.0.0",
-  "description": "Open multiple URLs, Amazon Orders, or Custom Templates in separate tabs with smart detection and preview.",
+  "version": "2.0.0",
+  "description": "Open multiple URLs, Amazon Order IDs, or custom templates in exact sequence with batch processing and tab grouping.",
   "permissions": [
     "tabs",
     "storage",
+    "tabGroups",
     "clipboardWrite"
   ],
   "host_permissions": [
@@ -13,12 +14,12 @@
   ],
   "action": {
     "default_popup": "popup.html",
+    "default_title": "Universal Multi Tab Opener",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
-    },
-    "default_title": "Universal Multi Tab Opener"
+    }
   },
   "background": {
     "service_worker": "background.js"

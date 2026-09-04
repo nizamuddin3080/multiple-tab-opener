@@ -11,7 +11,7 @@
     <!-- Header -->
     <header class="header">
       <h1>🌐 Universal Multi Tab Opener</h1>
-      <p class="subtitle">Open multiple URLs, Amazon Orders, or Custom Templates instantly</p>
+      <p class="subtitle">Open multiple URLs in exact sequence with batch processing</p>
     </header>
 
     <!-- Mode Tabs -->
@@ -32,6 +32,10 @@
         <span class="tab-icon">⚙️</span>
         <span class="tab-label">Custom Template</span>
       </button>
+      <button class="mode-tab" data-mode="preview">
+        <span class="tab-icon">👁️</span>
+        <span class="tab-label">Preview</span>
+      </button>
       <button class="mode-tab" data-mode="history">
         <span class="tab-icon">📜</span>
         <span class="tab-label">History</span>
@@ -49,7 +53,7 @@
       <div id="panel-smart" class="panel active">
         <div class="panel-header">
           <h2>Smart Auto Detect</h2>
-          <p class="panel-desc">Automatically detect input type and process accordingly</p>
+          <p class="panel-desc">Automatically detect input type while preserving sequence</p>
         </div>
         <div class="detection-status" id="smart-detection-status">
           <span class="status-icon">🔍</span>
@@ -86,6 +90,38 @@
           <label for="custom-template">URL Template:</label>
           <input type="text" id="custom-template" class="input-field" placeholder="https://example.com/orders/{ID}">
           <p class="field-hint">Use placeholders: <code>{ID}</code>, <code>{VALUE}</code>, or <code>{ORDER_ID}</code></p>
+        </div>
+      </div>
+
+      <!-- Preview Panel -->
+      <div id="panel-preview" class="panel full-panel">
+        <div class="panel-header">
+          <h2>Preview & Filter</h2>
+          <p class="panel-desc">Review, filter, and select items before opening</p>
+        </div>
+        <div class="preview-controls">
+          <input type="text" id="preview-search" class="input-field" placeholder="Search URLs or IDs...">
+          <div class="preview-filters">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filter-valid" checked>
+              <span>Valid</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="filter-invalid" checked>
+              <span>Invalid</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="filter-existing" checked>
+              <span>Existing</span>
+            </label>
+          </div>
+          <div class="preview-actions">
+            <button id="btn-select-all" class="btn btn-secondary btn-sm">Select All</button>
+            <button id="btn-deselect-all" class="btn btn-secondary btn-sm">Deselect All</button>
+          </div>
+        </div>
+        <div id="preview-list-container" class="preview-list-container">
+          <div id="preview-list" class="preview-list"></div>
         </div>
       </div>
 
@@ -126,9 +162,37 @@ or any custom IDs when using a URL template."
             <span class="counter-label">Duplicates:</span>
             <span class="counter-value" id="count-duplicates">0</span>
           </span>
+          <span class="counter-item">
+            <span class="counter-label">Invalid:</span>
+            <span class="counter-value" id="count-invalid">0</span>
+          </span>
         </div>
 
-        <!-- Options -->
+        <!-- Batch & Delay Options -->
+        <div class="batch-options">
+          <div class="form-group-inline">
+            <label for="batch-size">Batch Size:</label>
+            <select id="batch-size" class="select-field">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="0">All at once</option>
+            </select>
+          </div>
+          <div class="form-group-inline">
+            <label for="tab-delay">Delay (ms):</label>
+            <select id="tab-delay" class="select-field">
+              <option value="0" selected>No delay</option>
+              <option value="250">250 ms</option>
+              <option value="500">500 ms</option>
+              <option value="1000">1 second</option>
+              <option value="2000">2 seconds</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Advanced Options -->
         <div class="options-section">
           <label class="checkbox-label">
             <input type="checkbox" id="opt-background" checked>
@@ -142,6 +206,25 @@ or any custom IDs when using a URL template."
             <input type="checkbox" id="opt-skip" checked>
             <span>Skip already open links</span>
           </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="opt-group-tabs">
+            <span>Group opened tabs</span>
+          </label>
+        </div>
+
+        <!-- Group Options -->
+        <div id="group-options" class="group-options hidden">
+          <div class="form-group-inline">
+            <label for="group-name">Group Name:</label>
+            <input type="text" id="group-name" class="input-field input-small" placeholder="Multi Tab Opener">
+          </div>
+          <div class="form-group-inline">
+            <label for="group-method">Grouping:</label>
+            <select id="group-method" class="select-field select-small">
+              <option value="single">One group for all</option>
+              <option value="per-batch">Separate group per batch</option>
+            </select>
+          </div>
         </div>
 
         <!-- Action Buttons -->
@@ -150,7 +233,7 @@ or any custom IDs when using a URL template."
             <span class="btn-icon">🚀</span>
             Open All Tabs
           </button>
-          <button id="btn-preview" class="btn btn-secondary">
+          <button id="btn-preview-generate" class="btn btn-secondary">
             <span class="btn-icon">👁️</span>
             Preview Links
           </button>
@@ -162,6 +245,21 @@ or any custom IDs when using a URL template."
             <span class="btn-icon">🗑️</span>
             Clear
           </button>
+        </div>
+
+        <!-- Progress Bar (for batch processing) -->
+        <div id="progress-section" class="progress-section hidden">
+          <div class="progress-header">
+            <span>Opening Links...</span>
+            <span id="progress-count">0 / 0</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <div class="progress-details">
+            <span>Current Batch: <strong id="current-batch">0</strong></span>
+            <button id="btn-cancel-processing" class="btn btn-danger btn-sm">Cancel</button>
+          </div>
         </div>
 
         <!-- Results Summary -->
@@ -188,6 +286,14 @@ or any custom IDs when using a URL template."
               <span class="summary-label">Existing Tabs Activated:</span>
               <span class="summary-value" id="sum-existing">0</span>
             </div>
+            <div class="summary-item info">
+              <span class="summary-label">Skipped Existing:</span>
+              <span class="summary-value" id="sum-skipped">0</span>
+            </div>
+          </div>
+          <div class="session-actions">
+            <button id="btn-close-batch" class="btn btn-danger">Close Current Batch Tabs</button>
+            <button id="btn-close-last-session" class="btn btn-danger">Close Last Session Tabs</button>
           </div>
         </div>
       </div>
@@ -226,6 +332,25 @@ or any custom IDs when using a URL template."
         </div>
 
         <div class="form-group">
+          <label for="setting-default-mode">Default Mode:</label>
+          <select id="setting-default-mode" class="select-field">
+            <option value="smart">Smart Auto Detect</option>
+            <option value="direct">Direct Links</option>
+            <option value="amazon">Amazon Orders</option>
+            <option value="custom">Custom Template</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="setting-existing-behavior">Existing Tab Behavior:</label>
+          <select id="setting-existing-behavior" class="select-field">
+            <option value="activate">Activate Existing Tab</option>
+            <option value="skip">Skip Already Open</option>
+            <option value="duplicate">Open Duplicate Anyway</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label class="checkbox-label">
             <input type="checkbox" id="setting-auto-save" checked>
             <span>Auto-save input on close</span>
@@ -246,29 +371,12 @@ or any custom IDs when using a URL template."
 
         <div class="settings-info">
           <h3>About</h3>
-          <p><strong>Version:</strong> 1.0.0</p>
-          <p><strong>Description:</strong> A powerful tool to open multiple URLs, Amazon Order pages, or custom URL templates in separate Chrome tabs.</p>
+          <p><strong>Version:</strong> 2.0.0</p>
+          <p><strong>Description:</strong> A powerful tool to open multiple URLs, Amazon Order pages, or custom URL templates in separate Chrome tabs while preserving exact input sequence.</p>
           <p class="disclaimer">This extension only manages and opens URLs. It does not scrape data, bypass security, or interact with websites automatically.</p>
         </div>
       </div>
 
-    </div>
-
-    <!-- Preview Modal -->
-    <div id="preview-modal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Preview Links</h2>
-          <button class="modal-close" id="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div id="preview-list" class="preview-list"></div>
-        </div>
-        <div class="modal-footer">
-          <button id="btn-confirm-open" class="btn btn-primary">Open Selected Tabs</button>
-          <button id="btn-cancel-preview" class="btn btn-secondary">Cancel</button>
-        </div>
-      </div>
     </div>
 
     <!-- Loading Overlay -->

@@ -12,7 +12,11 @@
 # Dependencies
 node_modules/
 
-# Build outputs
+# Editors
+.vscode/
+.idea/
+
+# Build artifacts
 dist/
 build/
 target/
@@ -26,32 +30,30 @@ __pycache__/
 env/
 venv/
 .venv/
-.eggs/
-.egg-info/
-*.egg
-
-# Node.js
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/modules/
 .DS_Store
 Thumbs.db
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-*.coverage
+# Compiled and binary files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
-# Compression
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -74,4 +76,17 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Test and coverage
+coverage/
+htmlcov/
+.nyc_output
+istanbul*
+.mypy_cache/
+.pytest_cache/
+.hypothesis/
+
+# System
+.DS_Store
+Thumbs.db
 ```

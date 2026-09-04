@@ -1,68 +1,45 @@
 /**
  * Universal Multi Tab Opener - Background Service Worker
  * 
- * This service worker handles background tasks for the extension.
- * Currently minimal as most functionality is in the popup,
- * but can be extended for future features.
+ * Handles background tasks and maintains session state.
  */
 
-// ============================================
-// Extension Installation Handler
-// ============================================
-
+// Listen for extension install/update
 chrome.runtime.onInstalled.addListener((details) => {
-  if (details.reason === 'install') {
-    console.log('Universal Multi Tab Opener installed');
-    
-    // Initialize default settings
-    chrome.storage.local.set({
-      settings: {
-        tabLimit: 50,
-        historyLimit: 10,
-        autoSave: true,
-        restoreInput: true
-      },
-      options: {
-        background: true,
-        activate: true,
-        skip: true
-      },
-      history: []
-    });
-  } else if (details.reason === 'update') {
-    console.log('Universal Multi Tab Opener updated from version', details.previousVersion);
-  }
+  console.log('Universal Multi Tab Opener installed:', details.reason);
+  
+  // Initialize default storage
+  chrome.storage.local.set({
+    settings: {
+      tabLimit: 50,
+      historyLimit: 10,
+      autoSave: true,
+      restoreInput: true,
+      defaultMode: 'smart',
+      existingBehavior: 'activate'
+    },
+    options: {
+      background: true,
+      activate: true,
+      skip: true,
+      groupTabs: false,
+      groupName: 'Multi Tab Opener',
+      groupMethod: 'single'
+    },
+    history: [],
+    currentSessionTabs: [],
+    lastSessionTabs: []
+  });
 });
 
-// ============================================
-// Message Handler
-// ============================================
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  // Handle messages from popup or content scripts
-  switch (message.action) {
-    case 'getSettings':
-      chrome.storage.local.get(['settings'], (result) => {
-        sendResponse(result.settings);
-      });
-      return true; // Keep channel open for async response
-    
-    case 'saveSettings':
-      chrome.storage.local.set({ settings: message.settings }, () => {
-        sendResponse({ success: true });
-      });
-      return true;
-    
-    default:
-      sendResponse({ error: 'Unknown action' });
-  }
+// Keep service worker alive during long operations
+chrome.runtime.onStartup.addListener(() => {
+  console.log('Extension started');
 });
 
-// ============================================
-// Optional: Periodic Cleanup (if needed)
-// ============================================
+// Clean up old history periodically (once per day)
+let lastCleanup = Date.now();
 
-// Clean up old history entries periodically (every 24 hours)
 chrome.alarms?.onAlarm.addListener((alarm) => {
   if (alarm.name === 'cleanupHistory') {
     cleanupOldHistory();
@@ -71,7 +48,7 @@ chrome.alarms?.onAlarm.addListener((alarm) => {
 
 // Set up daily cleanup alarm
 chrome.alarms?.create('cleanupHistory', {
-  periodInMinutes: 24 * 60 // 24 hours
+  periodInMinutes: 24 * 60
 });
 
 async function cleanupOldHistory() {
@@ -81,13 +58,19 @@ async function cleanupOldHistory() {
     const historyLimit = data.settings?.historyLimit || 10;
     
     if (history.length > historyLimit) {
-      const trimmedHistory = history.slice(0, historyLimit);
-      await chrome.storage.local.set({ history: trimmedHistory });
-      console.log('Cleaned up old history entries');
+      const trimmed = history.slice(0, historyLimit);
+      await chrome.storage.local.set({ history: trimmed });
+      console.log(`Cleaned up ${history.length - historyLimit} old history entries`);
     }
   } catch (e) {
     console.error('Error cleaning up history:', e);
   }
 }
 
-console.log('Universal Multi Tab Opener background service worker loaded');
+// Handle messages from popup if needed
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'keepAlive') {
+    sendResponse({ status: 'alive' });
+  }
+  return true;
+});
